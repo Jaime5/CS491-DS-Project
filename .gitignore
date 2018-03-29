@@ -38,3 +38,4 @@ vignettes/*.pdf
 rsconnect/
 
 datasets
+.Rproj.user

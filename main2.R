@@ -1,22 +1,8 @@
 library(dplyr)
 library(tidyverse)
+library(ggplot2)
 
-victim_based_crimes = read.csv(file="datasets/BPD_Part_1_Victim_Based_Crime_Data.csv")
-
-glimpse(victim_based_crimes)
-
-# Randomly choose from this set, it's huge so let's chunk it down to 10k
-SAMPLE_SIZE = 10000
-
-victim_based_crimes.sample = victim_based_crimes[sample(nrow(victim_based_crimes), SAMPLE_SIZE),]
-
-glimpse(victim_based_crimes.sample)
+csr_data = read.csv(file="datasets/311_Customer_Service_Requests.csv", nrow=10000)
+glimpse(csr_data)
 
 
-
-# dif_districts = unique(police_calls.sample$district)
-# dif_districts
-# length(dif_districts)
-#
-# dif_priority = unique(police_calls.sample$priority)
-# dif_priority
