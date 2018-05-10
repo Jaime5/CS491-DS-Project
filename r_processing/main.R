@@ -2,10 +2,20 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 
-SAMPLE_SIZE = 100000
+income_df  = read.csv(file="datasets/income.csv")
+crime_df  = read.csv(file="datasets/crime.csv")
+service_df = read.csv(file="datasets/service.csv")
 
-pc_data = read.csv(file="datasets/911_Police_Calls_for_Service.csv", nrow=SAMPLE_SIZE)
-non_emerg_data = filter(pc_data, priority=="Non-Emergency")
+# glimpse(income_df)
+# glimpse(crime_df)
+# glimpse(service_df)
 
-glimpse(non_emerg_data)
+glimpse(income_df)
+summary(income_df)
+summary(crime_df)
+summary(service_df)
 
+income_df[order(income_df$Median.Household.Income),]
+# Basically, fed hill inner harbor and canton are good places to live(90k+)
+#
+# Bad places are oldtown, middle east, upton, druid heights
