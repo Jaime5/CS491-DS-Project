@@ -19,3 +19,8 @@ income_df[order(income_df$Median.Household.Income),]
 # Basically, fed hill inner harbor and canton are good places to live(90k+)
 #
 # Bad places are oldtown, middle east, upton, druid heights
+
+# High Income: Canton, Federal Hill, Inner Harbor
+# Low Income: Druid Heights, Harlem Park, Barclay
+
+
