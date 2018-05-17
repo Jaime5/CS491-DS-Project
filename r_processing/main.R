@@ -2,6 +2,8 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 
+set.seed(10201)
+
 # Within a district, is there a correlation between the time taken to complete
 # a service request and the total crime in that area?
 # If so, is it possible to predict “crime” based on the district’s service requests?¶
@@ -38,6 +40,7 @@ neighborhoods = c()
 crime_ratios = c()
 avg_svc_wait_times = c()
 med_svc_wait_times = c()
+n_incomes = c()
 
 for (n in unique(income_df$Neighborhood)) {
     crime = crime_df[crime_df$Neighborhood==n,]
@@ -51,16 +54,19 @@ for (n in unique(income_df$Neighborhood)) {
     crime_ratios = c(crime_ratios, ratio)
     avg_svc_wait_times = c(avg_svc_wait_times, avg_wait_day)
     med_svc_wait_times = c(med_svc_wait_times, med_wait_day)
+
+    n_incomes = c(n_incomes, income$Median.Household.Income)
+
     # break
 }
 
-results = data.frame(districts, crime_ratios, avg_svc_wait_times, med_svc_wait_times)
+results = data.frame(neighborhoods, crime_ratios, avg_svc_wait_times, med_svc_wait_times, n_incomes)
 
 # plot(wow$avg_svc_wait_times, wow$crime_ratios)
 # plot(wow$med_svc_wait_times, wow$crime_ratios)
 # plot(wow$ratios, wow$avg_waits_day)
 
-set.seed(10201)
+
 
 train = sample(nrow(results), nrow(results) * .7)
 
@@ -69,9 +75,14 @@ train = sample(nrow(results), nrow(results) * .7)
 
 # crime_fit = lm(crime_ratios ~ avg_svc_wait_times, data=results, subset=train)
 
-crime_fit = lm(crime_ratios ~ med_svc_wait_times, data=results, subset=train)
+crime.fit_1 = lm(crime_ratios ~ med_svc_wait_times, data=results, subset=train)
+summary(crime.fit_1)
 
-summary(crime_fit)
+crime.fit_2 = lm(crime_ratios ~ n_incomes, data=results, subset=train)
+summary(crime.fit_2)
+
+plot(results$n_incomes, results$crime_ratios, xlab="Incomes of Neighborhoods ($)", ylab="Crime Rate of Neighborhoods (ratio)")
+
 
 wow = mean((crime_ratios - predict(crime_fit, results))[-train]^2)
 
