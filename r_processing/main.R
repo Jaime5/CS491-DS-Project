@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+library(gam)
 
 set.seed(10201)
 
@@ -15,14 +16,20 @@ service_df = read.csv(file="../datasets/processed_data/service.csv")
 # income_df[order(income_df$Median.Household.Income),]
 # # High Income: Canton, Federal Hill, Inner Harbor
 # # good places to live(90k+) (mhhi)
-# canton.crime = crime_df[crime_df$Neighborhood=="canton",]
-# canton.income = income_df[income_df$Neighborhood=="canton",]
-# canton.service = service_df[service_df$Neighborhood=="canton",]
-# canton.ratio = nrow(canton.crime) / canton.income$Total.Population # 71 per 1000 crimes
-# canton.average_wait_days = mean(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
-#
-# plot(count(canton.crime, Day.of.the.Year))
-# plot(count(canton.crime, Week.of.the.Year))
+
+canton.crime = crime_df[crime_df$Neighborhood=="canton",]
+canton.income = income_df[income_df$Neighborhood=="canton",]
+canton.service = service_df[service_df$Neighborhood=="canton",]
+canton.ratio = nrow(canton.crime) / canton.income$Total.Population # 71 per 1000 crimes
+canton.avg_wait_days = mean(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
+
+canton.med_wait_days = median(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
+
+plot(count(canton.crime, Day.of.the.Year))
+lines(count(canton.crime, Day.of.the.Year))
+plot(count(canton.crime, Week.of.the.Year))
+
+# plot(canton.crime)
 #
 # druid_heights.crime = crime_df[crime_df$Neighborhood=="druid heights",]
 # druid_heights.income = income_df[income_df$Neighborhood=="druid heights",]
@@ -46,6 +53,7 @@ for (n in unique(income_df$Neighborhood)) {
     crime = crime_df[crime_df$Neighborhood==n,]
     income = income_df[income_df$Neighborhood==n,]
     service = service_df[service_df$Neighborhood==n,]
+
     ratio = nrow(crime) / income$Total.Population
     avg_wait_day = mean(service$Time.Delta.in.secs) / 60 / 60 / 24
     med_wait_day = median(service$Time.Delta.in.secs) / 60 / 60 / 24
@@ -54,55 +62,74 @@ for (n in unique(income_df$Neighborhood)) {
     crime_ratios = c(crime_ratios, ratio)
     avg_svc_wait_times = c(avg_svc_wait_times, avg_wait_day)
     med_svc_wait_times = c(med_svc_wait_times, med_wait_day)
-
     n_incomes = c(n_incomes, income$Median.Household.Income)
-
     # break
 }
 
 results = data.frame(neighborhoods, crime_ratios, avg_svc_wait_times, med_svc_wait_times, n_incomes)
 
+
+
 # plot(wow$avg_svc_wait_times, wow$crime_ratios)
 # plot(wow$med_svc_wait_times, wow$crime_ratios)
 # plot(wow$ratios, wow$avg_waits_day)
 
-
-
 train = sample(nrow(results), nrow(results) * .7)
 
+crime.fit_1 = lm(crime_ratios ~ avg_svc_wait_times + med_svc_wait_times, data=results, subset=train)
 
-# crime_fit = lm(crime_ratios ~ avg_svc_wait_times + med_svc_wait_times, data=results, subset=train)
-
-# crime_fit = lm(crime_ratios ~ avg_svc_wait_times, data=results, subset=train)
-
-crime.fit_1 = lm(crime_ratios ~ med_svc_wait_times, data=results, subset=train)
 summary(crime.fit_1)
 
-crime.fit_2 = lm(crime_ratios ~ n_incomes, data=results, subset=train)
+crime.fit_2 = lm(crime_ratios ~ avg_svc_wait_times, data=results, subset=train)
+
 summary(crime.fit_2)
+
+crime.fit_3 = lm(crime_ratios ~ med_svc_wait_times, data=results, subset=train)
+
+summary(crime.fit_2)
+
+crime.fit_4 = lm(crime_ratios ~ n_incomes, data=results, subset=train)
+
+summary(crime.fit_4)
+
+crime.fit_5 = lm(crime_ratios ~ n_incomes + med_svc_wait_times + avg_svc_wait_times, data=results, subset=train)
+
+summary(crime.fit_5)
+
+anova(crime.fit_1, crime.fit_2, crime.fit_3, crime.fit_4, test="F")
 
 plot(results$n_incomes, results$crime_ratios, xlab="Incomes of Neighborhoods ($)", ylab="Crime Rate of Neighborhoods (ratio)")
 
+# wow = mean((crime_ratios - predict(crime_fit, results))[-train]^2)
+#
+# wow.max = max(results$crime_ratios[train])
+# wow.max
+# wow.min = min(results$crime_ratios[train])
+# wow.min
+crime.fit_4 = gam(crime_ratios ~ s(n_incomes, 10), data=results, subset=train)
 
-wow = mean((crime_ratios - predict(crime_fit, results))[-train]^2)
+par(mfrow=c(1,1))
+plot(crime.fit_3, se=TRUE, col="blue")
 
-wow
-wow.max = max(results$crime_ratios[train])
-wow.max
-wow.min = min(results$crime_ratios[train])
-wow.min
+celestes_crime_df = read.csv(file="../datasets/processed_data/myData.csv")
 
-# (wow / (.103 - .000982))
-# sqrt(wow / (wow.max - wow.min))
+glimpse(celestes_crime_df)
 
-# wow / max() min()
+crime.fit_6 = lm(crime_count ~ service_request_count + doty, data=celestes_crime_df)
 
-# sqrt( mean( (prediction1-ISEtrain)^2) ) / ( max(ISEtrain)-min(ISEtrain) )
+summary(crime.fit_6)
 
-# mean((crime_ratios-predict(crime_fit, results))[-train]^2)
+plot(celestes_crime_df$service_request_count, celestes_crime_df$crime_count)
 
+plot(celestes_crime_df$doty, celestes_crime_df$crime_count)
+abline(crime.fit_6)
 
-# nrow(crime_fit)
-# train = ()
-
-# results[]
+# summary(crime.fit_6)
+# plot(crime.fit_6)
+#
+# mean((crime_count - predict(crime_fit, results))[-train]^2)
+#
+# wow.max = max(results$crime_ratios[train])
+# wow.max
+# wow.min = min(results$crime_ratios[train])
+# wow.min
