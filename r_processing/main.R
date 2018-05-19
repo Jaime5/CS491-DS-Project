@@ -85,6 +85,7 @@ for (n in unique(income_df$Neighborhood)) {
 
 results = data.frame(neighborhoods, crime_ratios, avg_svc_wait_times, med_svc_wait_times, n_incomes)
 
+# ==== Creating linear regression models for neighborhoods ===========
 train = sample(nrow(results), nrow(results) * .7)
 
 # crime rate, with service time to completion
@@ -112,6 +113,8 @@ summary(crime.fit_5)
 
 anova(crime.fit_1, crime.fit_2, crime.fit_3, crime.fit_4, test="F")
 
+# note that there is NO correlation between income and crime
+
 plot(results$n_incomes, results$crime_ratios, xlab="Incomes of Neighborhoods ($)", ylab="Crime Rate of Neighborhoods (ratio)")
 
 # wow = mean((crime_ratios - predict(crime_fit, results))[-train]^2)
@@ -124,3 +127,18 @@ crime.fit_4 = gam(crime_ratios ~ s(n_incomes, 10), data=results, subset=train)
 
 par(mfrow=c(1,1))
 plot(crime.fit_3, se=TRUE, col="blue")
+
+# ==== Using heirarchical clusting for neighborhoods ===========
+
+results.copy = cbind(results)
+# drops = c("neighborhoods", "med_svc_wait_times", "avg_svc_wait_times")
+drops = c("neighborhoods", "avg_svc_wait_times")
+results.copy = results.copy[,!(names(results.copy) %in% drops)]
+results.scale = scale(results.copy)
+results.dist = dist(results.scale)
+
+plot(hclust(results.dist), labels=results$neighborhoods, main="Complete Linkage")
+plot(hclust(results.dist), labels=results$neighborhoods, main="Average Linkage")
+plot(hclust(results.dist), labels=results$neighborhoods, main="Single Linkage")
+# plot()
+
