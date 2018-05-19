@@ -41,18 +41,16 @@ plot(compact_df$incomes, compact_df$crime_count)
 abline(lm.fit)
 
 # ============== Begin doing clustering of data ==============
+
 sample_df = cbind(compact_df)
-drops = c("neighborhood", "X")
-sample_df = sample_df[,!(names(sample_df) %in% drops)]
 
-hc.complete = hclust(dist(sample_df), method="complete")
+sample_df.sample = sample_n(sample_df, 35)
+neighborhoods = sample_df.sample$neighborhood
+drops = c("X", "neighborhood")
+sample_df.sample = sample_df.sample[,!(names(sample_df.sample) %in% drops)]
+sample_df.sample = scale(sample_df.sample)
+sample_df.dist = dist(sample_df.sample)
 
-plot(hc.complete, main="Complete Linkage", xlab="", sub="", cex=.9)
+# neighcompact_df$neighborhood
 
-cutree(hc.complete, 2)
-
-# xsc = scale(compact_df)
-# par(mfrow=c(1, 3))
-# plot(hc.complete, main="Complete Linkage", xlab="", sub="", cex=.9)
-# par(mfrow=c(1, 3))
-# plot(hc.complete, main="Complete Linkage", xlab="", sub="", cex=.9)
+plot(hclust(sample_df.dist), labels=neighborhoods, main="Complete Linkage")
