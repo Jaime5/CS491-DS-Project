@@ -51,6 +51,7 @@ sample_df.sample = sample_df.sample[,!(names(sample_df.sample) %in% drops)]
 sample_df.sample = scale(sample_df.sample)
 sample_df.dist = dist(sample_df.sample)
 
+hc.complete = hclust(sample_df.dist, method="complete")
 # neighcompact_df$neighborhood
 
-plot(hclust(sample_df.dist), labels=neighborhoods, main="Complete Linkage")
+# hclust(sample_df.dist), labels=neighborhoods, main="Complete Linkage")

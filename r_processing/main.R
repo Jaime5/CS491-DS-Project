@@ -131,11 +131,24 @@ plot(crime.fit_3, se=TRUE, col="blue")
 # ==== Using heirarchical clusting for neighborhoods ===========
 
 results.copy = cbind(results)
-# drops = c("neighborhoods", "med_svc_wait_times", "avg_svc_wait_times")
-drops = c("neighborhoods", "avg_svc_wait_times")
+drops = c("neighborhoods", "med_svc_wait_times", "avg_svc_wait_times")
+# drops = c("neighborhoods", "avg_svc_wait_times")
 results.copy = results.copy[,!(names(results.copy) %in% drops)]
 results.scale = scale(results.copy)
 results.dist = dist(results.scale)
+
+hc.com = hclust(results.dist, method="complete")
+
+summary(hc.com)
+
+plot(results.copy$n_incomes, results.copy$crime_ratios)
+plot(hc.com, main="Complete Linkage", labels=results$neighborhoods)
+
+max(results.copycrime_ratios)
+View(results)
+# View(results.copy)
+
+# cutree(hc.com, 4)
 
 plot(hclust(results.dist), labels=results$neighborhoods, main="Complete Linkage")
 plot(hclust(results.dist), labels=results$neighborhoods, main="Average Linkage")
