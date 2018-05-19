@@ -1,7 +1,9 @@
+library(tidyr)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(gam)
+library(glmnet)
 
 set.seed(10201)
 
@@ -9,39 +11,53 @@ set.seed(10201)
 # a service request and the total crime in that area?
 # If so, is it possible to predict “crime” based on the district’s service requests?¶
 
+# load datasets
+
 income_df = read.csv(file="../datasets/processed_data/income.csv")
 crime_df = read.csv(file="../datasets/processed_data/crime.csv")
 service_df = read.csv(file="../datasets/processed_data/service.csv")
 
+SECS_TO_DAYS = 86400
+
+# Sort neighborhoods based on income below.
 # income_df[order(income_df$Median.Household.Income),]
+
 # # High Income: Canton, Federal Hill, Inner Harbor
 # # good places to live(90k+) (mhhi)
 
-canton.crime = crime_df[crime_df$Neighborhood=="canton",]
-canton.income = income_df[income_df$Neighborhood=="canton",]
-canton.service = service_df[service_df$Neighborhood=="canton",]
-canton.ratio = nrow(canton.crime) / canton.income$Total.Population # 71 per 1000 crimes
-canton.avg_wait_days = mean(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
+# WE DO IT HIGH
 
-canton.med_wait_days = median(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
+high_neigh = "canton"
+high.crime = crime_df[crime_df$Neighborhood==high_neigh,]
+high.income = income_df[income_df$Neighborhood==high_neigh,]
+high.service = service_df[service_df$Neighborhood==high_neigh,]
+high.ratio = nrow(high.crime) / high.income$Total.Population # 71 per 1000 crimes
+high.avg_wait_days = mean(high.service$Time.Delta.in.secs) / SECS_TO_DAYS
+high.med_wait_days = median(high.service$Time.Delta.in.secs) / SECS_TO_DAYS
 
-plot(count(canton.crime, Day.of.the.Year))
-lines(count(canton.crime, Day.of.the.Year))
-plot(count(canton.crime, Week.of.the.Year))
+high.ratio
+high.med_wait_days
 
-plot(canton.crime)
+# NOW WE DO LOW
 
-druid_heights.crime = crime_df[crime_df$Neighborhood=="druid heights",]
-druid_heights.income = income_df[income_df$Neighborhood=="druid heights",]
-druid_heights.service = service_df[service_df$Neighborhood=="druid heights",]
-druid_heights.ratio = nrow(druid_heights.crime) / druid_heights.income$Total.Population
-druid_heights.average_wait_days = mean(druid_heights.service$Time.Delta.in.secs) / 60 / 60 / 24
+plot(count(high.crime, Day.of.the.Year))
+lines(count(high.crime, Day.of.the.Year))
+plot(count(high.crime, Week.of.the.Year))
 
-druid_heights.ratio
-druid_heights.average_wait_days
+low_neigh = "druid_heights"
+low.crime = crime_df[crime_df$Neighborhood==low_neigh,]
+low.crime = income_df[income_df$Neighborhood==low_neigh,]
+low.service = service_df[service_df$Neighborhood==low_neigh,]
+low.ratio = nrow(low.crime) / low.income$Total.Population
+low.average_wait_days = mean(low.service$Time.Delta.in.secs) / 86400
 
-plot(count(druid_heights.crime, Day.of.the.Year))
-plot(count(druid_heights.crime, Week.of.the.Year))
+low.ratio
+low.average_wait_days
+
+plot(count(low.crime, Day.of.the.Year))
+plot(count(low.crime, Week.of.the.Year))
+
+# ====Begin processing data for all neighborhoods ===========
 
 neighborhoods = c()
 crime_ratios = c()
@@ -50,7 +66,6 @@ med_svc_wait_times = c()
 n_incomes = c()
 
 # is there a correlation between crime rate
-# and
 
 for (n in unique(income_df$Neighborhood)) {
     crime = crime_df[crime_df$Neighborhood==n,]
@@ -58,24 +73,17 @@ for (n in unique(income_df$Neighborhood)) {
     service = service_df[service_df$Neighborhood==n,]
 
     ratio = nrow(crime) / income$Total.Population
-    avg_wait_day = mean(service$Time.Delta.in.secs) / 60 / 60 / 24
-    med_wait_day = median(service$Time.Delta.in.secs) / 60 / 60 / 24
+    avg_wait_day = mean(service$Time.Delta.in.secs) / SECS_TO_DAYS
+    med_wait_day = median(service$Time.Delta.in.secs) / SECS_TO_DAYS
 
     neighborhoods = c(neighborhoods, n)
     crime_ratios = c(crime_ratios, ratio)
     avg_svc_wait_times = c(avg_svc_wait_times, avg_wait_day)
     med_svc_wait_times = c(med_svc_wait_times, med_wait_day)
     n_incomes = c(n_incomes, income$Median.Household.Income)
-    # break
 }
 
 results = data.frame(neighborhoods, crime_ratios, avg_svc_wait_times, med_svc_wait_times, n_incomes)
-
-
-
-# plot(wow$avg_svc_wait_times, wow$crime_ratios)
-# plot(wow$med_svc_wait_times, wow$crime_ratios)
-# plot(wow$ratios, wow$avg_waits_day)
 
 train = sample(nrow(results), nrow(results) * .7)
 
