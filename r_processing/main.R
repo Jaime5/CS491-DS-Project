@@ -13,44 +13,17 @@ income_df = read.csv(file="../datasets/processed_data/income.csv")
 crime_df = read.csv(file="../datasets/processed_data/crime.csv")
 service_df = read.csv(file="../datasets/processed_data/service.csv")
 
-# income_df[order(income_df$Median.Household.Income),]
-# # High Income: Canton, Federal Hill, Inner Harbor
-# # good places to live(90k+) (mhhi)
+serviceSummary = service_df %>% group_by(Method.Received) %>% summarize(count = n())
+print(serviceSummary)
 
-canton.crime = crime_df[crime_df$Neighborhood=="canton",]
-canton.income = income_df[income_df$Neighborhood=="canton",]
-canton.service = service_df[service_df$Neighborhood=="canton",]
-canton.ratio = nrow(canton.crime) / canton.income$Total.Population # 71 per 1000 crimes
-canton.avg_wait_days = mean(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
-
-canton.med_wait_days = median(canton.service$Time.Delta.in.secs) / 60 / 60 / 24
-
-plot(count(canton.crime, Day.of.the.Year))
-lines(count(canton.crime, Day.of.the.Year))
-plot(count(canton.crime, Week.of.the.Year))
-
-plot(canton.crime)
-
-druid_heights.crime = crime_df[crime_df$Neighborhood=="druid heights",]
-druid_heights.income = income_df[income_df$Neighborhood=="druid heights",]
-druid_heights.service = service_df[service_df$Neighborhood=="druid heights",]
-druid_heights.ratio = nrow(druid_heights.crime) / druid_heights.income$Total.Population
-druid_heights.average_wait_days = mean(druid_heights.service$Time.Delta.in.secs) / 60 / 60 / 24
-
-druid_heights.ratio
-druid_heights.average_wait_days
-
-plot(count(druid_heights.crime, Day.of.the.Year))
-plot(count(druid_heights.crime, Week.of.the.Year))
+crimeSummary = crime_df %>% group_by(Description) %>% summarize(count = n())
+print(crimeSummary)
 
 neighborhoods = c()
 crime_ratios = c()
 avg_svc_wait_times = c()
 med_svc_wait_times = c()
 n_incomes = c()
-
-# is there a correlation between crime rate
-# and
 
 for (n in unique(income_df$Neighborhood)) {
     crime = crime_df[crime_df$Neighborhood==n,]
@@ -71,11 +44,13 @@ for (n in unique(income_df$Neighborhood)) {
 
 results = data.frame(neighborhoods, crime_ratios, avg_svc_wait_times, med_svc_wait_times, n_incomes)
 
+ggplot(data = results, mapping = aes(x = neighborhoods, y = med_svc_wait_times)) +
+    geom_col(color = "#006EA1") +
+    labs(title = "Median Time to Complete Service Requests in Baltimore City",
+         x = "Neighborhood",
+         y = "Median Time (Days)") +
+    theme_light() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-
-# plot(wow$avg_svc_wait_times, wow$crime_ratios)
-# plot(wow$med_svc_wait_times, wow$crime_ratios)
-# plot(wow$ratios, wow$avg_waits_day)
 
 train = sample(nrow(results), nrow(results) * .7)
 
@@ -91,7 +66,7 @@ summary(crime.fit_2)
 
 crime.fit_3 = lm(crime_ratios ~ med_svc_wait_times, data=results, subset=train)
 
-summary(crime.fit_2)
+summary(crime.fit_3)
 
 # crime rate reported, with income per area
 crime.fit_4 = lm(crime_ratios ~ n_incomes, data=results, subset=train)
