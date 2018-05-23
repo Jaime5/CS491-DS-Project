@@ -20,7 +20,7 @@ service_df = read.csv(file="../datasets/processed_data/service.csv")
 SECS_TO_DAYS = 86400
 
 # Sort neighborhoods based on income below.
-# income_df[order(income_df$Median.Household.Income),]
+income_df[order(income_df$Median.Household.Income),]
 
 # # High Income: Canton, Federal Hill, Inner Harbor
 # # good places to live(90k+) (mhhi)
@@ -139,19 +139,19 @@ results.dist = dist(results.scale)
 
 hc.com = hclust(results.dist, method="complete")
 
-summary(hc.com)
-
 plot(results.copy$n_incomes, results.copy$crime_ratios)
+
+ggplot(data=results, mapping=aes(x=n_incomes, y=crime_ratios)) +
+    geom_point(color = "#006EA1") +
+    labs(title="Crime Ratio x Avg Median Income",
+         x="Average Median Income per Household ($)",
+         y="Crime Ratio") +
+    theme_light() + theme(axis.text.x=element_text(angle=90, hjust=1))
+
 plot(hc.com, main="Complete Linkage", labels=results$neighborhoods)
 
-max(results.copycrime_ratios)
-View(results)
-# View(results.copy)
 
-# cutree(hc.com, 4)
-
-plot(hclust(results.dist), labels=results$neighborhoods, main="Complete Linkage")
+# plot(hclust(results.dist), labels=results$neighborhoods, main="Complete Linkage")
 plot(hclust(results.dist), labels=results$neighborhoods, main="Average Linkage")
 plot(hclust(results.dist), labels=results$neighborhoods, main="Single Linkage")
-# plot()
 
