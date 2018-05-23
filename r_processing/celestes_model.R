@@ -31,7 +31,6 @@ lm.pred = predict(lm.fit, newx=compact_df[test,])
 
 mean((lm.pred - compact.test)^ 2)
 
-plot(lm.fit)
 summary(lm.fit)
 
 plot(compact_df$incomes, compact_df$crime_count, xlab="Income", ylab="Crime Count")
