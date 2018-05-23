@@ -20,7 +20,7 @@ service_df = read.csv(file="../datasets/processed_data/service.csv")
 SECS_TO_DAYS = 86400
 
 # Sort neighborhoods based on income below.
-# income_df[order(income_df$Median.Household.Income),]
+income_df[order(income_df$Median.Household.Income),]
 
 # # High Income: Canton, Federal Hill, Inner Harbor
 # # good places to live(90k+) (mhhi)
@@ -131,14 +131,27 @@ plot(crime.fit_3, se=TRUE, col="blue")
 # ==== Using heirarchical clusting for neighborhoods ===========
 
 results.copy = cbind(results)
-# drops = c("neighborhoods", "med_svc_wait_times", "avg_svc_wait_times")
-drops = c("neighborhoods", "avg_svc_wait_times")
+drops = c("neighborhoods", "med_svc_wait_times", "avg_svc_wait_times")
+# drops = c("neighborhoods", "avg_svc_wait_times")
 results.copy = results.copy[,!(names(results.copy) %in% drops)]
 results.scale = scale(results.copy)
 results.dist = dist(results.scale)
 
-plot(hclust(results.dist), labels=results$neighborhoods, main="Complete Linkage")
+hc.com = hclust(results.dist, method="complete")
+
+plot(results.copy$n_incomes, results.copy$crime_ratios)
+
+ggplot(data=results, mapping=aes(x=n_incomes, y=crime_ratios)) +
+    geom_point(color = "#006EA1") +
+    labs(title="Crime Ratio x Avg Median Income",
+         x="Average Median Income per Household ($)",
+         y="Crime Ratio") +
+    theme_light() + theme(axis.text.x=element_text(angle=90, hjust=1))
+
+plot(hc.com, main="Complete Linkage", labels=results$neighborhoods)
+
+
+# plot(hclust(results.dist), labels=results$neighborhoods, main="Complete Linkage")
 plot(hclust(results.dist), labels=results$neighborhoods, main="Average Linkage")
 plot(hclust(results.dist), labels=results$neighborhoods, main="Single Linkage")
-# plot()
 

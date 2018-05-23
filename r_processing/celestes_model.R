@@ -27,9 +27,6 @@ compact.test = compact_df[test]
 
 lm.fit = lm(crime_count ~ doty + service_request_count + incomes, data=compact_df, subset=train)
 
-# lm.fit = lm(crime_count ~ doty, data=compact_df, subset=train)
-lm.fit = lm(crime_count ~ incomes, data=compact_df, subset=train)
-
 lm.pred = predict(lm.fit, newx=compact_df[test,])
 
 mean((lm.pred - compact.test)^ 2)
@@ -37,20 +34,18 @@ mean((lm.pred - compact.test)^ 2)
 plot(lm.fit)
 summary(lm.fit)
 
-plot(compact_df$incomes, compact_df$crime_count)
+plot(compact_df$incomes, compact_df$crime_count, xlab="Income", ylab="Crime Count")
 abline(lm.fit)
 
-# ============== Begin doing clustering of data ==============
+summary(lm.fit)
 
-sample_df = cbind(compact_df)
+ggplot(data=compact_df,
+       mapping=aes(x=incomes, y=crime_count)) +
+                   geom_point(color = "#006EA1") +
+                   labs(title="Crime Ratio x Median Income for ALL neighborhoods, with all data points.",
+        x="Income Per Area ($)",
+        y="Crime Ratio (ratio)") +
+    theme_light() + theme(axis.text.x=element_text(angle=90, hjust=1))
 
-sample_df.sample = sample_n(sample_df, 35)
-neighborhoods = sample_df.sample$neighborhood
-drops = c("X", "neighborhood")
-sample_df.sample = sample_df.sample[,!(names(sample_df.sample) %in% drops)]
-sample_df.sample = scale(sample_df.sample)
-sample_df.dist = dist(sample_df.sample)
 
-# neighcompact_df$neighborhood
 
-plot(hclust(sample_df.dist), labels=neighborhoods, main="Complete Linkage")
