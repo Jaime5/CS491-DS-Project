@@ -85,6 +85,36 @@ for (n in unique(income_df$Neighborhood)) {
 
 results = data.frame(neighborhoods, crime_ratios, avg_svc_wait_times, med_svc_wait_times, n_incomes)
 
+
+ggplot(data = results, mapping = aes(x = neighborhoods, y = crime_ratios)) +
+    geom_col(color = "#006EA1") +
+    labs(title = "Median Time to Complete Service Requests in Baltimore City",
+         x = "Neighborhood",
+         y = "Median Time (Days)") +
+    theme_light() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(data = results, mapping = aes(x = neighborhoods, y = avg_svc_wait_times)) +
+    geom_col(color = "#006EA1") +
+    labs(title = "Median Time to Complete Service Requests in Baltimore City",
+         x = "Neighborhood",
+         y = "Median Time (Days)") +
+    theme_light() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(data = results, mapping = aes(x = neighborhoods, y = med_svc_wait_times)) +
+    geom_col(color = "#006EA1") +
+    labs(title = "Median Time to Complete Service Requests in Baltimore City",
+         x = "Neighborhood",
+         y = "Median Time (Days)") +
+    theme_light() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(data = results, mapping = aes(x = neighborhoods, y = n_incomes)) +
+    geom_col(color = "#006EA1") +
+    labs(title = "Median Time to Complete Service Requests in Baltimore City",
+         x = "Neighborhood",
+         y = "Median Time (Days)") +
+    theme_light() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
 # ==== Creating linear regression models for neighborhoods ===========
 train = sample(nrow(results), nrow(results) * .7)
 
