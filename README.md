@@ -1,4 +1,4 @@
-# CS491-DS-Project
+# Baltimore DS for Good
 
 The final results and measurements can be found in the .pdf file.
 
