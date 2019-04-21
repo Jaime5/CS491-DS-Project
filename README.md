@@ -1,5 +1,11 @@
 # CS491-DS-Project
 
+The final results and measurements can be found in the .pdf file.
+
+
+
+
+## How we built the results
 Python Processing contains the preprocessing of data done using Pandas and Numpy.
 
 R Processing contains the model build and generation, as well as some additional preprocessing of baltimore data.
